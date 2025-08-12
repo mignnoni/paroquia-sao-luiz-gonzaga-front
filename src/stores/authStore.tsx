@@ -1,11 +1,10 @@
-import { api, loginApi } from "@/services/api";
+import { loginApi } from "@/services/api";
 import { create } from "zustand";
 import Cookies from "js-cookie";
 import { jwtDecode, type JwtPayload } from "jwt-decode";
 import { ROLES } from "@/constants/Roles";
 import type { AxiosResponse } from "axios";
 import { sidebarStore } from "./sidebarStore";
-import type { IGetMemberResponse } from "@/interfaces/IGetMemberResponse";
 
 interface ISignInCredentials {
   email: string;
@@ -14,7 +13,6 @@ interface ISignInCredentials {
 
 interface User {
   id: string;
-  memberId: string;
   name: string;
   role: string;
 }
@@ -24,13 +22,12 @@ interface AuthProps {
   isAdmin: boolean;
   isManager: boolean;
   isAuthenticated: boolean;
-  canManageContracts: boolean;
 }
 
 interface IAuthState extends AuthProps {
   signIn: (credentials: ISignInCredentials, redirect?: string) => Promise<void>;
   signOut: () => void;
-  fetchMemberId: () => Promise<void>;
+  // fetchMemberId: () => Promise<void>;
 }
 
 interface IMember {
@@ -39,7 +36,7 @@ interface IMember {
 }
 
 interface LoginResponse {
-  teamMember: IMember;
+  member: IMember;
   token: string;
 }
 
@@ -73,14 +70,12 @@ const InitialProps = (): AuthProps => {
       return {
         user: {
           id,
-          memberId: "",
-          name: data.teamMember.fullName,
+          name: data.member.fullName,
           role,
         },
         isAdmin: strRole === ROLES.Admin,
         isManager: [ROLES.Admin, ROLES.Manager].some((x) => x === strRole),
         isAuthenticated: true,
-        canManageContracts: false,
       };
     } catch {
       Cookies.remove("proj.parish.token");
@@ -93,7 +88,6 @@ const InitialProps = (): AuthProps => {
     isAdmin: false,
     isManager: false,
     isAuthenticated: false,
-    canManageContracts: false,
   };
 };
 
@@ -107,7 +101,7 @@ export const authStore = create<IAuthState>((set) => {
       const { data } = await loginApi.post<
         ISignInCredentials,
         AxiosResponse<LoginResponse>
-      >("teamMembers/login", {
+      >("members/login", {
         email,
         password,
       });
@@ -134,7 +128,7 @@ export const authStore = create<IAuthState>((set) => {
         user: {
           id,
           memberId: "",
-          name: data.teamMember.fullName,
+          name: data.member.fullName,
           role,
         },
         isAdmin: strRole === ROLES.Admin,
@@ -158,19 +152,19 @@ export const authStore = create<IAuthState>((set) => {
       // });
       // window.location.href = '/login';
     },
-    fetchMemberId: async (): Promise<void> => {
-      const response = await api.get<IGetMemberResponse>(`/members/id`);
-      const member = response.data;
+    // fetchMemberId: async (): Promise<void> => {
+    //   const response = await api.get<IGetMemberResponse>(`/members/id`);
+    //   const member = response.data;
 
-      set((state) => ({
-        user: state.user
-          ? {
-              ...state.user,
-              memberId: member.memberId,
-            }
-          : undefined,
-        canManageContracts: member.canManageContracts,
-      }));
-    },
+    //   set((state) => ({
+    //     user: state.user
+    //       ? {
+    //           ...state.user,
+    //           memberId: member.memberId,
+    //         }
+    //       : undefined,
+    //     canManageContracts: member.canManageContracts,
+    //   }));
+    // },
   };
 });

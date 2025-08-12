@@ -10,9 +10,8 @@ import * as zod from "zod";
 import { Input } from "@/components/Form/Input";
 import type { AxiosError } from "axios";
 
-// Create validation schema
 const loginFormSchema = zod.object({
-  email: zod.string().email("Digite um e-mail válido"),
+  email: zod.email("Digite um e-mail válido"),
   password: zod.string().min(1, "A senha é obrigatória"),
 });
 

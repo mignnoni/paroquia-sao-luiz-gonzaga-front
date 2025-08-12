@@ -1,11 +1,6 @@
 import type { IMenu } from "@/interfaces/IMenu";
-import {
-  HiOutlineHome,
-  HiHome,
-  HiDocumentText,
-  HiClipboardList,
-} from "react-icons/hi";
-import { LuClipboardList, LuFileText } from "react-icons/lu";
+import { HiOutlineHome, HiHome } from "react-icons/hi";
+import { LuMegaphone, LuUsers } from "react-icons/lu";
 import { create } from "zustand";
 
 interface ISidebarState {
@@ -23,38 +18,20 @@ const menuItems: IMenu[] = [
     href: "/",
     icon: <HiOutlineHome />,
     iconActive: <HiHome />,
-    roles: [
-      "admin",
-      "manager",
-      "teamMember",
-      "supervisor",
-      "taxAccounting",
-      "documents",
-      "analyst",
-      "taxAccountingNfse",
-    ],
+    roles: ["admin", "manager", "member"],
   },
   {
-    title: "Contratos",
-    href: "/contratos",
-    icon: <LuFileText />,
-    iconActive: <HiDocumentText />,
-    roles: [
-      "admin",
-      "manager",
-      "teamMember",
-      "supervisor",
-      "taxAccounting",
-      "documents",
-      "analyst",
-      "taxAccountingNfse",
-    ],
+    title: "Membros",
+    href: "/admin/membros",
+    icon: <LuUsers />,
+    iconActive: <LuUsers />,
+    roles: ["admin"],
   },
   {
-    title: "Tarefas base",
-    href: "/tarefas-base",
-    icon: <LuClipboardList />,
-    iconActive: <HiClipboardList />,
+    title: "Comunicados",
+    href: "/comunicados",
+    icon: <LuMegaphone />,
+    iconActive: <LuMegaphone />,
     roles: ["admin", "manager"],
   },
 ];

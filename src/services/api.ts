@@ -30,7 +30,7 @@ api.interceptors.response.use(
 );
 
 export const loginApi = axios.create({
-  baseURL: import.meta.env.VITE_LOGIN_API_URL,
+  baseURL: import.meta.env.VITE_API_URL,
   headers: {
     Authorization: `Bearer ${token}`,
   },

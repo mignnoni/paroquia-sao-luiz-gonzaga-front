@@ -5,7 +5,6 @@ import {
   Button,
   createListCollection,
   Heading,
-  Dialog,
   Stack,
   type ListCollection,
 } from "@chakra-ui/react";
@@ -20,6 +19,14 @@ import { authStore } from "@/stores/authStore";
 import { Textarea } from "@/components/Form/TextArea";
 import type { ICollection } from "@/interfaces/ICollection";
 import type { AxiosError } from "axios";
+import {
+  DialogBody,
+  DialogCloseTrigger,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogRoot,
+} from "@/components/ui/dialog";
 
 interface AddPendingMemberModalProps {
   isOpen: boolean;
@@ -56,7 +63,7 @@ export function AddPendingMemberModal({
       defaultValues: {
         fullName: "",
         email: "",
-        memberType: MemberTypes.TeamMember,
+        memberType: MemberTypes.Member,
         observation: "",
       },
     });
@@ -90,18 +97,18 @@ export function AddPendingMemberModal({
 
   useEffect(() => {
     if (isOpen && !isAdmin) {
-      setValue("memberType", MemberTypes.TeamMember);
+      setValue("memberType", MemberTypes.Manager);
     }
     if (!isOpen) reset();
   }, [isOpen]);
 
   return (
-    <Dialog.Root open={isOpen} size={["xs", "sm", "sm", "sm"]}>
-      <Dialog.Content as={"form"} onSubmit={handleSubmit(handleCreate)}>
-        <Dialog.Header>
+    <DialogRoot open={isOpen} size={["xs", "sm", "sm", "sm"]}>
+      <DialogContent as={"form"} onSubmit={handleSubmit(handleCreate)}>
+        <DialogHeader>
           <Heading>Convidar novo membro</Heading>
-        </Dialog.Header>
-        <Dialog.Body>
+        </DialogHeader>
+        <DialogBody>
           <Stack gap={4}>
             <Input
               type={"text"}
@@ -131,8 +138,8 @@ export function AddPendingMemberModal({
               {...register("observation")}
             />
           </Stack>
-        </Dialog.Body>
-        <Dialog.Footer>
+        </DialogBody>
+        <DialogFooter>
           <Button variant={"outline"} onClick={onCancel}>
             Cancelar
           </Button>
@@ -144,9 +151,9 @@ export function AddPendingMemberModal({
           >
             Salvar
           </Button>
-        </Dialog.Footer>
-        <Dialog.CloseTrigger onClick={onCancel} />
-      </Dialog.Content>
-    </Dialog.Root>
+        </DialogFooter>
+        <DialogCloseTrigger onClick={onCancel} />
+      </DialogContent>
+    </DialogRoot>
   );
 }

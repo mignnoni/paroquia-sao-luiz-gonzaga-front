@@ -1,4 +1,6 @@
 import { Input } from "@chakra-ui/react";
+import { InputGroup } from "./ui/input-group";
+import { Button } from "./ui/button";
 
 interface SearchBarProps {
   placeholder?: string;
