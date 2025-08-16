@@ -1,6 +1,13 @@
 import type { IMenu } from "@/interfaces/IMenu";
 import { HiOutlineHome, HiHome } from "react-icons/hi";
-import { LuMegaphone, LuUsers } from "react-icons/lu";
+import {
+  PiChurch,
+  PiChurchFill,
+  PiMegaphone,
+  PiMegaphoneFill,
+  PiUsers,
+  PiUsersFill,
+} from "react-icons/pi";
 import { create } from "zustand";
 
 interface ISidebarState {
@@ -23,15 +30,22 @@ const menuItems: IMenu[] = [
   {
     title: "Membros",
     href: "/admin/membros",
-    icon: <LuUsers />,
-    iconActive: <LuUsers />,
+    icon: <PiUsers />,
+    iconActive: <PiUsersFill />,
     roles: ["admin"],
   },
   {
     title: "Comunicados",
     href: "/comunicados",
-    icon: <LuMegaphone />,
-    iconActive: <LuMegaphone />,
+    icon: <PiMegaphone />,
+    iconActive: <PiMegaphoneFill />,
+    roles: ["admin", "manager"],
+  },
+  {
+    title: "Matriz e capelas",
+    href: "/matriz-e-capelas",
+    icon: <PiChurch />,
+    iconActive: <PiChurchFill />,
     roles: ["admin", "manager"],
   },
 ];

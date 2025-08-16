@@ -11,21 +11,22 @@ import { RichTextEditor } from "@/components/Form/RichTextEditor";
 import { Button } from "@/components/ui/button";
 import { api } from "@/services/api";
 import { handleError, type IApiError } from "@/utils/exceptionHandler";
-import { useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { useEffect, useState } from "react";
 import { toaster } from "@/components/ui/toaster";
 import { MultipleFileUpload } from "@/components/File/MultipleFileUpload";
 import { ImageThumbnails } from "@/components/File/ImageThumbnails";
 import type { AxiosError } from "axios";
+import type { IListNews } from "@/interfaces/IListNews";
 
-interface IAddContractDTO {
+interface IEditNewsDTO {
   title: string;
   content: string | null;
   files: File[];
   otherScheduleType: number;
 }
 
-const createFormSchema = zod.object({
+const editFormSchema = zod.object({
   title: zod
     .string()
     .min(5, "O título deve ter no mínimo 5 caracteres")
@@ -35,12 +36,13 @@ const createFormSchema = zod.object({
   otherScheduleType: zod.number(),
 });
 
-export function AddNews() {
+export function EditNews() {
   const navigate = useNavigate();
+  const { id } = useParams();
 
   const { register, handleSubmit, formState, reset, setValue, watch } =
-    useForm<IAddContractDTO>({
-      resolver: zodResolver(createFormSchema),
+    useForm<IEditNewsDTO>({
+      resolver: zodResolver(editFormSchema),
       defaultValues: {
         files: [],
         otherScheduleType: 2,
@@ -53,27 +55,44 @@ export function AddNews() {
   const [filesToAdd, setFilesToAdd] = useState<File[]>([]);
   const content = watch("content");
 
+  useEffect(() => {
+    const fetchNews = async () => {
+      if (!id) return;
+      try {
+        const response = await api.get<IListNews>(`otherSchedules/${id}`);
+        const news = response.data;
+        reset({
+          title: news.title,
+          content: news.content ?? "",
+          files: [],
+          otherScheduleType: 2,
+        });
+      } catch (error: unknown) {
+        handleError(error as AxiosError<IApiError>);
+      }
+    };
+    fetchNews();
+  }, [id, reset]);
+
   const handleClearFile = (file: File) => {
     setFilesToAdd(filesToAdd.filter((f) => f !== file));
-    console.log(filesToAdd);
   };
 
-  const handleCreate: SubmitHandler<IAddContractDTO> = async (data) => {
+  const handleUpdate: SubmitHandler<IEditNewsDTO> = async (data) => {
+    if (!id) return;
     try {
       const { title, content, otherScheduleType } = data;
       const form = new FormData();
 
       form.append("title", title);
       form.append("otherScheduleType", otherScheduleType.toString());
-
       if (content) form.append("content", content);
-
       filesToAdd.forEach((file) => {
         form.append("files", file);
       });
 
-      await api.postForm("otherSchedules", form);
-      toaster.success({ title: "Comunicado criado com sucesso" });
+      await api.putForm("otherSchedules", form, { params: { id } });
+      toaster.success({ title: "Comunicado atualizado com sucesso" });
       navigate("/comunicados");
       reset();
     } catch (error: unknown) {
@@ -90,20 +109,20 @@ export function AddNews() {
   return (
     <DefaultPage>
       <CustomBreadcrumb
-        current={"Novo comunicado"}
+        current={"Editar comunicado"}
         items={[
           { title: "Home", link: "/" },
           { title: "Comunicados", link: "/comunicados" },
         ]}
       />
       <PageHeading icon={<LuMegaphone />} my={6}>
-        Novo comunicado
+        Editar comunicado
       </PageHeading>
       <Stack
         maxW={"800px"}
         gap={[4, 6]}
         as={"form"}
-        onSubmit={handleSubmit(handleCreate)}
+        onSubmit={handleSubmit(handleUpdate)}
         bg={{ base: "white", _dark: "gray.900" }}
         px={[6, 8]}
         py={[6, 8]}
@@ -126,7 +145,7 @@ export function AddNews() {
         <MultipleFileUpload
           onUpload={setFilesToAdd}
           onClear={handleClearFile}
-          label="Carregar imagens"
+          label="Carregar novas imagens"
           showList={false}
         />
         <ImageThumbnails files={filesToAdd} onRemove={handleClearFile} />
