@@ -16,20 +16,25 @@ export function TempSchedule({ onAdd }: ITempScheduleProps) {
     const { open, onOpen, onClose } = useDisclosure();
     const [showAddSchedule, setShowAddSchedule] = useState(false);
 
-    const handleConfirm = (time: string) => {
+    const handleConfirmTimeModal = (time: string) => {
         addTime(time);
         onClose();
     };
 
-    const handleCancel = () => {
+    const handleCancelTimeModal = () => {
         onClose();
+    };
+
+    const handleAddSchedule = () => {
+        onAdd(tempSchedule);
+        setShowAddSchedule(false);
     };
 
     return (
         <Stack>
             <HStack color={{ base: 'brand.600', _dark: 'brand.300' }}>
                 <LuClock />
-                <Text fontWeight={500}>Programação de missas</Text>
+                <Text fontWeight={500}>Programação de Missas</Text>
             </HStack>
             {!showAddSchedule && (
                 <Button w="fit-content" colorPalette={'brand'} onClick={() => setShowAddSchedule(true)}>
@@ -95,7 +100,7 @@ export function TempSchedule({ onAdd }: ITempScheduleProps) {
                             colorPalette={'brand'}
                             w="fit-content"
                             px={6}
-                            onClick={() => onAdd(tempSchedule)}
+                            onClick={handleAddSchedule}
                             disabled={tempSchedule.day.length < 3 || tempSchedule.massTimes.length === 0}
                         >
                             Adicionar programação
@@ -103,7 +108,7 @@ export function TempSchedule({ onAdd }: ITempScheduleProps) {
                     </HStack>
                 </Stack>
             )}
-            <AddMassTimeModal isOpen={open} onCancel={handleCancel} onConfirm={handleConfirm} />
+            <AddMassTimeModal isOpen={open} onCancel={handleCancelTimeModal} onConfirm={handleConfirmTimeModal} />
         </Stack>
     );
 }

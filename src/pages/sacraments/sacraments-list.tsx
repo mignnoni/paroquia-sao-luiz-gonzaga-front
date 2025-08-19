@@ -11,12 +11,13 @@ import { HStack, Icon, useBreakpointValue, Button } from '@chakra-ui/react';
 import { AxiosError } from 'axios';
 import { useCallback, useEffect, useState } from 'react';
 import { LuCirclePlus } from 'react-icons/lu';
+import { OtherScheduleTypes } from '@/constants/OtherScheduleTypes';
 import { useNavigate } from 'react-router-dom';
-import { PiChurchFill } from 'react-icons/pi';
-import type { IMassLocationList } from '@/interfaces/IMassLocationList';
-import { MassLocationsTable } from '@/components/MassLocations/mass-locations-table';
+import { OtherSchedulesTable } from '@/components/OtherSchedules/other-schedules-table';
+import { PiCrossFill } from 'react-icons/pi';
+import type { IOtherSchedule } from '@/interfaces/IOtherSchedule';
 
-export function MassLocationsList() {
+export function SacramentsList() {
     const isWideVersion = useBreakpointValue({
         base: false,
         md: true,
@@ -25,27 +26,30 @@ export function MassLocationsList() {
     const navigate = useNavigate();
 
     const [isLoaded, setIsLoaded] = useState(false);
-    const [massLocationsList, setMassLocationsList] = useState<IMassLocationList[]>([]);
+    const [sacramentsList, setSacramentsList] = useState<IOtherSchedule[]>([]);
     const [filters, setFilters] = useState<IPageFilter>({
         pageIndex: 0,
         pageSize: 10,
     });
 
-    const fetchNews = useCallback(() => {
+    const fetchSacraments = useCallback(() => {
         setIsLoaded(false);
 
-        api.get<IMassLocationList[]>('massLocations', {
-            params: filters,
+        api.get<IOtherSchedule[]>('otherSchedules', {
+            params: {
+                ...filters,
+                type: OtherScheduleTypes.Sacrament,
+            },
         })
-            .then((resp) => setMassLocationsList(resp.data))
+            .then((resp) => setSacramentsList(resp.data))
             .catch((err) => handleError(err))
             .finally(() => setIsLoaded(true));
     }, [filters]);
 
     const handleDelete = (id: string): void => {
-        api.delete(`/massLocations/${id}`)
+        api.delete(`/otherSchedules/${id}`)
             .then(() => {
-                toaster.success({ title: 'Matriz ou capela excluída com sucesso' });
+                toaster.success({ title: 'Sacramento excluído com sucesso' });
                 filter();
             })
             .catch((err: AxiosError<IApiError>) => {
@@ -72,28 +76,28 @@ export function MassLocationsList() {
     };
 
     const filter = () => {
-        if (filters.pageIndex == 0) fetchNews();
+        if (filters.pageIndex == 0) fetchSacraments();
         else setPageIndex(0);
     };
 
-    const addMassLocation = () => {
-        navigate('/matriz-e-capelas/novo');
+    const addSacraments = () => {
+        navigate('/sacramentos/novo');
     };
 
-    const editMassLocation = (id: string) => {
-        navigate(`/matriz-e-capelas/editar/${id}`);
+    const editSacraments = (id: string) => {
+        navigate(`/sacramentos/editar/${id}`);
     };
 
     useEffect(() => {
-        fetchNews();
-    }, [fetchNews]);
+        fetchSacraments();
+    }, [fetchSacraments]);
 
     return (
         <DefaultPage>
-            <CustomBreadcrumb items={[{ title: 'Home', link: '/' }]} current="Matriz e capelas" />
+            <CustomBreadcrumb items={[{ title: 'Home', link: '/' }]} current="Sacramentos" />
             <HStack my={6} justify={'space-between'}>
-                <PageHeading icon={<PiChurchFill />}>Matriz e capelas</PageHeading>
-                <Button colorPalette={'brand'} onClick={addMassLocation}>
+                <PageHeading icon={<PiCrossFill />}>Sacramentos</PageHeading>
+                <Button colorPalette={'brand'} onClick={addSacraments}>
                     <Icon fontSize={'sm'}>
                         <LuCirclePlus />
                     </Icon>
@@ -101,11 +105,12 @@ export function MassLocationsList() {
                 </Button>
             </HStack>
             {isWideVersion && (
-                <MassLocationsTable
+                <OtherSchedulesTable
                     isLoaded={isLoaded}
-                    massLocationsList={massLocationsList}
+                    otherSchedulesList={sacramentsList}
+                    deleteMessage="o sacramento"
                     deleteAction={handleDelete}
-                    editAction={editMassLocation}
+                    editAction={editSacraments}
                 />
             )}
             {/* {!isWideVersion && isLoaded && (

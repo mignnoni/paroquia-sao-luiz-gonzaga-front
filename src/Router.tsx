@@ -15,6 +15,9 @@ import { EditNews } from './pages/news/edit.news';
 import { MassLocationsList } from './pages/massLocations/mass-locations-list';
 import { AddMassLocation } from './pages/massLocations/add-mass-location';
 import { EditMassLocation } from './pages/massLocations/edit-mass-location';
+import { TransparencyPortal } from './pages/transparencyPortal/transparency-portal';
+import { SacramentsList } from './pages/sacraments/sacraments-list';
+import { GroupsAndServicesList } from './pages/groupsAndServices/groups-and-services-list';
 
 export function Router() {
     return (
@@ -37,6 +40,13 @@ export function Router() {
                     <Route path="novo" element={<AddMassLocation />} />
                     <Route path="editar/:id" element={<EditMassLocation />} />
                     <Route path="" element={<MassLocationsList />} />
+                </Route>
+                <Route path="portal-de-transparencia" element={<TransparencyPortal />} />
+                <Route path="sacramentos">
+                    <Route path="" element={<SacramentsList />} />
+                </Route>
+                <Route path="pastorais-grupos-e-servicos">
+                    <Route path="" element={<GroupsAndServicesList />} />
                 </Route>
             </Route>
             <Route path="login" element={<Login />} />

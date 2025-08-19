@@ -56,7 +56,6 @@ export function SidebarItem({ icon, iconActive, href, title, displayTitle }: Sid
                             <Text
                                 fontWeight={isActive ? 'semibold' : 'regular'}
                                 color={isActive ? 'inherit' : { base: 'gray.400', _dark: 'gray.400' }}
-                                whiteSpace={'nowrap'}
                             >
                                 {title}
                             </Text>

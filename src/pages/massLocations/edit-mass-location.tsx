@@ -3,7 +3,7 @@ import { PageHeading } from '@/components/PageHeading';
 import { DefaultPage } from '@/layouts/DefaultPage';
 import { MassSchedulesSection } from '@/components/MassLocations/Schedules/mass-schedules-section';
 import { PiChurchFill } from 'react-icons/pi';
-import { HStack, Stack } from '@chakra-ui/react';
+import { HStack, Spinner, Stack, Text } from '@chakra-ui/react';
 import { Button } from '@/components/ui/button';
 import { useNavigate, useParams } from 'react-router-dom';
 import { massStore } from '@/stores/massStore';
@@ -14,13 +14,12 @@ import { handleError, type IApiError } from '@/utils/exceptionHandler';
 import type { AxiosError } from 'axios';
 import * as zod from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm, type SubmitHandler } from 'react-hook-form';
+import { Controller, useForm, type SubmitHandler } from 'react-hook-form';
 import { AddressAutocomplete } from '@/components/Form/AddressAutocomplete';
 import { Input } from '@/components/Form/Input';
 import { Field } from '@/components/ui/field';
 import { Switch } from '@/components/ui/switch';
 import { toaster } from '@/components/ui/toaster';
-import { CardSkeleton } from '@/components/Card/CardSkeleton';
 
 interface IEditMassLocationDTO {
     name: string;
@@ -50,7 +49,7 @@ export function EditMassLocation() {
 
     const navigate = useNavigate();
 
-    const { register, handleSubmit, formState, reset, setValue, watch } = useForm<IEditMassLocationDTO>({
+    const { register, handleSubmit, formState, reset, setValue, control } = useForm<IEditMassLocationDTO>({
         resolver: zodResolver(updateFormSchema),
         defaultValues: {
             name: massLocation.name,
@@ -71,8 +70,12 @@ export function EditMassLocation() {
     const fetchMassLocation = async () => {
         try {
             const { data } = await api.get<IMassLocation>(`/massLocations/${id}`);
-            console.log(data);
             setMassLocation(data);
+            setValue('name', data.name);
+            setValue('address', data.address);
+            setValue('latitude', data.latitude);
+            setValue('longitude', data.longitude);
+            setValue('isHeadquarters', data.isHeadquarters);
         } catch (error) {
             handleError(error as AxiosError<IApiError>);
         }
@@ -104,9 +107,26 @@ export function EditMassLocation() {
 
     return (
         <DefaultPage>
-            <CustomBreadcrumb items={[{ title: 'Home', link: '/' }]} current="Matriz e capelas" />
-            <PageHeading icon={<PiChurchFill />}>Matriz e capelas</PageHeading>
-            {!massLocation.id && <CardSkeleton count={10} />}
+            <CustomBreadcrumb
+                items={[
+                    { title: 'Home', link: '/' },
+                    { title: 'Matriz e capelas', link: '/matriz-e-capelas' },
+                ]}
+                current="Editar matriz/capela"
+            />
+            {Object.keys(errors).map((key) => (
+                <Text key={key} color={'red.500'}>
+                    {errors[key as keyof IEditMassLocationDTO]?.message}
+                </Text>
+            ))}
+            <PageHeading icon={<PiChurchFill />} mb={4}>
+                Editar matriz/capela
+            </PageHeading>
+            {!massLocation.id && (
+                <Stack>
+                    <Spinner />
+                </Stack>
+            )}
             {massLocation.id && (
                 <Stack
                     maxW={'800px'}
@@ -121,6 +141,7 @@ export function EditMassLocation() {
                 >
                     <Input
                         type="text"
+                        defaultValue={massLocation.name}
                         label="Nome da matriz/capela"
                         errorText={errors?.name?.message}
                         placeholder="Ex: Igreja Matriz São Luiz Gonzaga"
@@ -128,20 +149,22 @@ export function EditMassLocation() {
                     />
 
                     <AddressAutocomplete
+                        defaultValue={massLocation.address}
                         label="Endereço completo"
                         onAddressSelect={handleAddressSelect}
                         errorText={errors?.address?.message}
                         placeholder="Digite o endereço completo..."
                     />
 
-                    <Field label="Matriz?">
-                        <Switch
-                            checked={watch('isHeadquarters')}
-                            onCheckedChange={(details) => setValue('isHeadquarters', details.checked)}
-                        >
-                            Marque se esta é a matriz da paróquia
-                        </Switch>
-                    </Field>
+                    <Controller
+                        control={control}
+                        name={'isHeadquarters'}
+                        render={({ field: { onChange, value } }) => (
+                            <Field label={'Matriz?'}>
+                                <Switch colorPalette={'brand'} mt={1} checked={value} onChange={onChange}></Switch>
+                            </Field>
+                        )}
+                    />
                     <MassSchedulesSection />
                     <HStack w="full" justify={'flex-end'}>
                         <Button variant={'outline'} w="fit-content" px={6} onClick={handleCancel}>

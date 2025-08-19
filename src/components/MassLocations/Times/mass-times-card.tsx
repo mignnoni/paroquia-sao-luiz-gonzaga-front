@@ -7,6 +7,9 @@ import { massStore } from '@/stores/massStore';
 import { api } from '@/services/api';
 import type { AxiosError, AxiosResponse } from 'axios';
 import { handleError, type IApiError } from '@/utils/exceptionHandler';
+import { toaster } from '@/components/ui/toaster';
+import { Alert } from '@/components/Alert';
+import { useState } from 'react';
 
 interface ICreateMassTimeDTO {
     time: string;
@@ -14,14 +17,16 @@ interface ICreateMassTimeDTO {
 
 export function MassTimesCard({ massScheduleId }: { massScheduleId: string }) {
     const { open, onOpen, onClose } = useDisclosure();
+    const { open: openAlert, onOpen: onOpenAlert, onClose: onCloseAlert } = useDisclosure();
     const { massLocation, addMassTime, removeMassTime } = massStore();
+    const [massTimeToRemove, setMassTimeToRemove] = useState<string | null>(null);
 
     const massTimes = massLocation.massSchedules.find((schedule) => schedule.id === massScheduleId)?.massTimes;
 
     const handleConfirm = async (time: string) => {
         try {
             const { data } = await api.post<ICreateMassTimeDTO, AxiosResponse<IMassTime>>(
-                `massLocations/${massLocation.id}/massSchedules/${massScheduleId}/massTimes`,
+                `massLocations/${massLocation.id}/schedules/${massScheduleId}/times`,
                 {
                     time,
                 }
@@ -32,6 +37,7 @@ export function MassTimesCard({ massScheduleId }: { massScheduleId: string }) {
                 massScheduleId,
                 time,
             });
+            toaster.success({ title: 'Horário adicionado com sucesso' });
         } catch (error) {
             handleError(error as AxiosError<IApiError>);
         } finally {
@@ -39,13 +45,23 @@ export function MassTimesCard({ massScheduleId }: { massScheduleId: string }) {
         }
     };
 
-    const handleRemoveMassTime = async (id: string) => {
+    const handleRemoveMassTime = async () => {
+        if (!massTimeToRemove) return;
+
         try {
-            await api.delete(`massLocations/${massLocation.id}/massSchedules/${massScheduleId}/massTimes/${id}`);
-            removeMassTime(massScheduleId, id);
+            await api.delete(`massLocations/${massLocation.id}/schedules/${massScheduleId}/times/${massTimeToRemove}`);
+            removeMassTime(massScheduleId, massTimeToRemove);
+            toaster.success({ title: 'Horário excluído com sucesso' });
         } catch (error) {
             handleError(error as AxiosError<IApiError>);
+        } finally {
+            onCloseAlert();
         }
+    };
+
+    const handleOpenAlertToRemoveMassTime = (id: string) => {
+        setMassTimeToRemove(id);
+        onOpenAlert();
     };
 
     const handleCancel = () => {
@@ -78,13 +94,13 @@ export function MassTimesCard({ massScheduleId }: { massScheduleId: string }) {
                         <Tag
                             rounded={'full'}
                             w="fit-content"
-                            onClose={() => handleRemoveMassTime(massTime.id)}
+                            onClose={() => handleOpenAlertToRemoveMassTime(massTime.id)}
                             key={massTime.id}
                             px={3}
                             py={1}
                             colorPalette={'orange'}
                         >
-                            {massTime.time}
+                            {massTime.time.substring(0, 5)}
                         </Tag>
                     ))}
                     <Tag
@@ -104,6 +120,12 @@ export function MassTimesCard({ massScheduleId }: { massScheduleId: string }) {
                 </HStack>
             )}
             <AddMassTimeModal isOpen={open} onCancel={handleCancel} onConfirm={handleConfirm} />
+            <Alert
+                title="Tem certeza que deseja excluir o horário?"
+                onCancel={onClose}
+                onConfirm={handleRemoveMassTime}
+                isOpen={openAlert}
+            />
         </Stack>
     );
 }
