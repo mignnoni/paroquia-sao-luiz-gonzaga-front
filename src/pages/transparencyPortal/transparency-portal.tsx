@@ -69,7 +69,7 @@ export function TransparencyPortal() {
                 Portal da transparência
             </PageHeading>
             <Stack
-                maxW={'800px'}
+                maxW={'1000px'}
                 gap={[4, 6]}
                 as={'form'}
                 onSubmit={handleUpdate}

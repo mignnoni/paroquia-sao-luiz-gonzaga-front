@@ -18,6 +18,8 @@ import { EditMassLocation } from './pages/massLocations/edit-mass-location';
 import { TransparencyPortal } from './pages/transparencyPortal/transparency-portal';
 import { SacramentsList } from './pages/sacraments/sacraments-list';
 import { GroupsAndServicesList } from './pages/groupsAndServices/groups-and-services-list';
+import { AddSacrament } from './pages/sacraments/add-sacrament';
+import { EditSacrament } from './pages/sacraments/edit-sacrament';
 
 export function Router() {
     return (
@@ -44,6 +46,8 @@ export function Router() {
                 <Route path="portal-de-transparencia" element={<TransparencyPortal />} />
                 <Route path="sacramentos">
                     <Route path="" element={<SacramentsList />} />
+                    <Route path="novo" element={<AddSacrament />} />
+                    <Route path="editar/:id" element={<EditSacrament />} />
                 </Route>
                 <Route path="pastorais-grupos-e-servicos">
                     <Route path="" element={<GroupsAndServicesList />} />
