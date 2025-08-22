@@ -80,11 +80,11 @@ export function GroupsAndServicesList() {
         else setPageIndex(0);
     };
 
-    const addSacraments = () => {
+    const addGroupsAndServices = () => {
         navigate('/pastorais-grupos-e-servicos/novo');
     };
 
-    const editSacraments = (id: string) => {
+    const editGroupsAndServices = (id: string) => {
         navigate(`/pastorais-grupos-e-servicos/editar/${id}`);
     };
 
@@ -97,7 +97,7 @@ export function GroupsAndServicesList() {
             <CustomBreadcrumb items={[{ title: 'Home', link: '/' }]} current="Pastorais, grupos e serviços" />
             <HStack my={6} justify={'space-between'}>
                 <PageHeading icon={<PiSquaresFourFill />}>Pastorais, grupos e serviços</PageHeading>
-                <Button colorPalette={'brand'} onClick={addSacraments}>
+                <Button colorPalette={'brand'} onClick={addGroupsAndServices}>
                     <Icon fontSize={'sm'}>
                         <LuCirclePlus />
                     </Icon>
@@ -110,7 +110,7 @@ export function GroupsAndServicesList() {
                     otherSchedulesList={groupsAndServicesList}
                     deleteMessage="o registro"
                     deleteAction={handleDelete}
-                    editAction={editSacraments}
+                    editAction={editGroupsAndServices}
                 />
             )}
             {/* {!isWideVersion && isLoaded && (

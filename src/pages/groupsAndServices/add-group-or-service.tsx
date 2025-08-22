@@ -12,16 +12,13 @@ import { Button } from '@/components/ui/button';
 import { api } from '@/services/api';
 import { handleError, type IApiError } from '@/utils/exceptionHandler';
 import { useNavigate } from 'react-router-dom';
-import { useState } from 'react';
 import { toaster } from '@/components/ui/toaster';
-import { MultipleFileUpload } from '@/components/File/MultipleFileUpload';
 import type { AxiosError } from 'axios';
 import { OtherScheduleTypes } from '@/constants/OtherScheduleTypes';
 
-interface IAddContractDTO {
+interface IAddGroupOrServiceDTO {
     title: string;
-    content: string | null;
-    files: File[];
+    content: string;
     type: number;
 }
 
@@ -30,34 +27,27 @@ const createFormSchema = zod.object({
         .string()
         .min(5, 'O título deve ter no mínimo 5 caracteres')
         .max(250, 'O título deve ter no máximo 250 caracteres'),
-    content: zod.string().nullable(),
-    files: zod.array(zod.instanceof(File)),
+    content: zod.string().min(1, 'O conteúdo é obrigatório'),
     type: zod.number(),
 });
 
-export function AddNews() {
+export function AddGroupOrService() {
     const navigate = useNavigate();
 
-    const { register, handleSubmit, formState, reset, setValue, watch } = useForm<IAddContractDTO>({
+    const { register, handleSubmit, formState, reset, setValue, watch } = useForm<IAddGroupOrServiceDTO>({
         resolver: zodResolver(createFormSchema),
         defaultValues: {
-            files: [],
-            type: OtherScheduleTypes.News,
+            title: '',
+            type: OtherScheduleTypes.GroupsAndServices,
             content: '',
         },
     });
 
     const { errors, isSubmitting } = formState;
 
-    const [filesToAdd, setFilesToAdd] = useState<File[]>([]);
     const content = watch('content');
 
-    const handleClearFile = (file: File) => {
-        setFilesToAdd(filesToAdd.filter((f) => f !== file));
-        console.log(filesToAdd);
-    };
-
-    const handleCreate: SubmitHandler<IAddContractDTO> = async (data) => {
+    const handleCreate: SubmitHandler<IAddGroupOrServiceDTO> = async (data) => {
         try {
             const { title, content, type } = data;
             const form = new FormData();
@@ -67,13 +57,9 @@ export function AddNews() {
 
             if (content) form.append('content', content);
 
-            filesToAdd.forEach((file) => {
-                form.append('files', file);
-            });
-
             await api.postForm('otherSchedules', form);
-            toaster.success({ title: 'Comunicado criado com sucesso' });
-            navigate('/comunicados');
+            toaster.success({ title: 'Grupo ou serviço criado com sucesso' });
+            navigate('/pastorais-grupos-e-servicos');
             reset();
         } catch (error: unknown) {
             handleError(error as AxiosError<IApiError>);
@@ -81,22 +67,21 @@ export function AddNews() {
     };
 
     const handleCancel = () => {
-        setFilesToAdd([]);
         reset();
-        navigate('/comunicados');
+        navigate('/pastorais-grupos-e-servicos');
     };
 
     return (
         <DefaultPage>
             <CustomBreadcrumb
-                current={'Novo comunicado'}
+                current={'Novo grupo ou serviço'}
                 items={[
                     { title: 'Home', link: '/' },
-                    { title: 'Comunicados', link: '/comunicados' },
+                    { title: 'Pastorais, grupos e serviços', link: '/pastorais-grupos-e-servicos' },
                 ]}
             />
             <PageHeading icon={<LuMegaphone />} my={6}>
-                Novo comunicado
+                Novo grupo ou serviço
             </PageHeading>
             <Stack
                 maxW={'800px'}
@@ -115,9 +100,8 @@ export function AddNews() {
                     onChange={(value) => setValue('content', value)}
                     label="Descrição"
                     errorText={errors?.content?.message}
-                    placeholder="Digite o conteúdo do comunicado aqui..."
+                    placeholder="Digite o conteúdo do grupo ou serviço aqui..."
                 />
-                <MultipleFileUpload onUpload={setFilesToAdd} onClear={handleClearFile} label="Carregar imagens" />
                 <HStack w="full" justify={'flex-end'}>
                     <Button variant={'outline'} w="fit-content" px={6} onClick={handleCancel}>
                         Cancelar

@@ -9,6 +9,7 @@ import { EditMember } from './pages/admin/edit-member';
 import { Members } from './pages/admin/members';
 import { ManagerLayout } from './layouts/ManagerLayout';
 import { Profile } from './pages/profile';
+import { Home } from './pages/home';
 import { AddNews } from './pages/news/add-news';
 import { NewsList } from './pages/news/news-list';
 import { EditNews } from './pages/news/edit.news';
@@ -20,6 +21,8 @@ import { SacramentsList } from './pages/sacraments/sacraments-list';
 import { GroupsAndServicesList } from './pages/groupsAndServices/groups-and-services-list';
 import { AddSacrament } from './pages/sacraments/add-sacrament';
 import { EditSacrament } from './pages/sacraments/edit-sacrament';
+import { EditGroupOrService } from './pages/groupsAndServices/edit-group-or-service';
+import { AddGroupOrService } from './pages/groupsAndServices/add-group-or-service';
 
 export function Router() {
     return (
@@ -32,6 +35,7 @@ export function Router() {
                 </Route>
             </Route>
             <Route path="" element={<ManagerLayout />}>
+                <Route path="" element={<Home />} />
                 <Route path="perfil" element={<Profile />} />
                 <Route path="comunicados">
                     <Route path="novo" element={<AddNews />} />
@@ -51,6 +55,8 @@ export function Router() {
                 </Route>
                 <Route path="pastorais-grupos-e-servicos">
                     <Route path="" element={<GroupsAndServicesList />} />
+                    <Route path="novo" element={<AddGroupOrService />} />
+                    <Route path="editar/:id" element={<EditGroupOrService />} />
                 </Route>
             </Route>
             <Route path="login" element={<Login />} />

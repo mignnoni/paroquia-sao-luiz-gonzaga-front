@@ -16,6 +16,7 @@ import { useEffect } from 'react';
 import { toaster } from '@/components/ui/toaster';
 import type { AxiosError } from 'axios';
 import type { IOtherSchedule } from '@/interfaces/IOtherSchedule';
+import { OtherScheduleTypes } from '@/constants/OtherScheduleTypes';
 
 interface IEditSacramentDTO {
     title: string;
@@ -40,7 +41,7 @@ export function EditSacrament() {
         resolver: zodResolver(editFormSchema),
         defaultValues: {
             title: '',
-            type: 2,
+            type: OtherScheduleTypes.Sacrament,
             content: '',
         },
     });
@@ -58,7 +59,7 @@ export function EditSacrament() {
                 reset({
                     title: sacrament.title,
                     content: sacrament.content ?? '',
-                    type: 2,
+                    type: sacrament.type,
                 });
             } catch (error: unknown) {
                 handleError(error as AxiosError<IApiError>);
