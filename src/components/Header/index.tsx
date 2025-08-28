@@ -4,6 +4,8 @@ import { Profile } from './Profile';
 import { Menu } from './Menu';
 import { useNavigate } from 'react-router-dom';
 
+const logo = '/src/assets/logo';
+
 export function Header() {
     const { colorMode } = useColorMode();
     const navigate = useNavigate();
@@ -23,7 +25,11 @@ export function Header() {
         >
             <Menu />
             <Box onClick={() => navigate('/')}>
-                <Image src={colorMode == 'dark' ? '/logo.png' : '/logo-light.png'} maxH={[6, 8, 9]} />
+                <Image
+                    src={colorMode == 'dark' ? `${logo}_dark.png` : `${logo}.png`}
+                    alt="Logo Paróquia São Luiz Gonzaga"
+                    maxH={[6, 8, 9]}
+                />
             </Box>
             <HStack gap={4}>
                 <ColorModeButton rounded={'full'} />

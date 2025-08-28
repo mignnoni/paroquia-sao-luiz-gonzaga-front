@@ -7,7 +7,7 @@ import type { IPageFilter } from '@/interfaces/IPageFilter';
 import { DefaultPage } from '@/layouts/DefaultPage';
 import { api } from '@/services/api';
 import { handleError, type IApiError } from '@/utils/exceptionHandler';
-import { HStack, Icon, useBreakpointValue, Button } from '@chakra-ui/react';
+import { HStack, Icon, useBreakpointValue, Button, Stack, For } from '@chakra-ui/react';
 import { AxiosError } from 'axios';
 import { useCallback, useEffect, useState } from 'react';
 import { LuCirclePlus } from 'react-icons/lu';
@@ -15,6 +15,8 @@ import { useNavigate } from 'react-router-dom';
 import { PiChurchFill } from 'react-icons/pi';
 import type { IMassLocationList } from '@/interfaces/IMassLocationList';
 import { MassLocationsTable } from '@/components/MassLocations/mass-locations-table';
+import { EmptyList } from '@/components/EmptyList';
+import { MassLocationsCard } from '@/components/MassLocations/mass-locations-card';
 
 export function MassLocationsList() {
     const isWideVersion = useBreakpointValue({
@@ -108,19 +110,20 @@ export function MassLocationsList() {
                     editAction={editMassLocation}
                 />
             )}
-            {/* {!isWideVersion && isLoaded && (
-        <Stack mt={8} gap={4}>
-          <For each={members} fallback={<EmptyList />}>
-            {(member) => (
-              <PendingMemberCard
-                key={member.id}
-                member={member}
-                deleteAction={handleDelete}
-              />
+            {!isWideVersion && isLoaded && (
+                <Stack mt={8} gap={4}>
+                    <For each={massLocationsList} fallback={<EmptyList />}>
+                        {(massLocation) => (
+                            <MassLocationsCard
+                                key={massLocation.id}
+                                massLocation={massLocation}
+                                deleteAction={handleDelete}
+                                editAction={editMassLocation}
+                            />
+                        )}
+                    </For>
+                </Stack>
             )}
-          </For>
-        </Stack>
-      )} */}
             {!isWideVersion && !isLoaded && <CardSkeleton count={10} />}
             <Pagination
                 setPageIndex={setPageIndex}
