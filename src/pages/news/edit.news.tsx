@@ -5,7 +5,7 @@ import { DefaultPage } from '@/layouts/DefaultPage';
 import { HStack, Spinner, Stack, Text } from '@chakra-ui/react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { LuMegaphone } from 'react-icons/lu';
-import { type SubmitHandler, useForm } from 'react-hook-form';
+import { Controller, type SubmitHandler, useForm } from 'react-hook-form';
 import * as zod from 'zod';
 import { RichTextEditor } from '@/components/Form/RichTextEditor';
 import { Button } from '@/components/ui/button';
@@ -16,16 +16,20 @@ import { useEffect, useState } from 'react';
 import { toaster } from '@/components/ui/toaster';
 import { MultipleFileUpload } from '@/components/File/MultipleFileUpload';
 import type { AxiosError } from 'axios';
-import { OtherScheduleTypes } from '@/constants/OtherScheduleTypes';
 import type { INewsById } from '@/interfaces/INewsById';
 import { ImagePreviewCard } from '@/components/Files/image-preview-card';
+import { Textarea } from '@/components/Form/TextArea';
+import { Field } from '@/components/ui/field';
+import { Switch } from '@/components/ui/switch';
 
 interface IEditNewsDTO {
     title: string;
-    content: string | null;
+    content: string;
+    summary: string;
+    highlight: boolean;
+    highlightUntil: string | null;
     filesToAdd: File[];
     filesToRemove: string[];
-    type: number;
 }
 
 const editFormSchema = zod.object({
@@ -33,10 +37,15 @@ const editFormSchema = zod.object({
         .string()
         .min(5, 'O título deve ter no mínimo 5 caracteres')
         .max(250, 'O título deve ter no máximo 250 caracteres'),
-    content: zod.string().nullable(),
+    content: zod.string({ message: 'O conteúdo é obrigatório' }),
     filesToAdd: zod.array(zod.instanceof(File)),
     filesToRemove: zod.array(zod.string()),
-    type: zod.number(),
+    summary: zod
+        .string()
+        .min(10, 'O resumo deve ter no mínimo 10 caracteres')
+        .max(200, 'O resumo deve ter no máximo 200 caracteres'),
+    highlight: zod.boolean(),
+    highlightUntil: zod.string().nullable(),
 });
 
 export function EditNews() {
@@ -45,15 +54,8 @@ export function EditNews() {
 
     const [news, setNews] = useState<INewsById | null>(null);
 
-    const { register, handleSubmit, formState, reset, setValue, watch } = useForm<IEditNewsDTO>({
+    const { register, handleSubmit, formState, reset, setValue, watch, control } = useForm<IEditNewsDTO>({
         resolver: zodResolver(editFormSchema),
-        defaultValues: {
-            title: '',
-            filesToAdd: [],
-            filesToRemove: [],
-            type: OtherScheduleTypes.News,
-            content: '',
-        },
     });
 
     const { errors, isSubmitting } = formState;
@@ -61,19 +63,22 @@ export function EditNews() {
     const [filesToAdd, setFilesToAdd] = useState<File[]>([]);
     const [filesToRemove, setFilesToRemove] = useState<string[]>([]);
     const content = watch('content');
+    const highlight = watch('highlight');
 
     useEffect(() => {
         const fetchNews = async () => {
             if (!id) return;
             try {
-                const response = await api.get<INewsById>(`otherSchedules/${id}`);
+                const response = await api.get<INewsById>(`news/${id}`);
                 setNews(response.data);
                 reset({
                     title: response.data.title,
                     content: response.data.content ?? '',
                     filesToAdd: [],
                     filesToRemove: [],
-                    type: response.data.type,
+                    summary: response.data.summary,
+                    highlight: response.data.highlight,
+                    highlightUntil: response.data.highlightUntil ? response.data.highlightUntil.split('T')[0] : null,
                 });
             } catch (error: unknown) {
                 handleError(error as AxiosError<IApiError>);
@@ -98,11 +103,13 @@ export function EditNews() {
     const handleUpdate: SubmitHandler<IEditNewsDTO> = async (data) => {
         if (!id) return;
         try {
-            const { title, content, type } = data;
+            const { title, content, summary, highlight, highlightUntil } = data;
             const form = new FormData();
 
             form.append('title', title);
-            form.append('type', type.toString());
+            form.append('summary', summary);
+            form.append('highlight', highlight.toString());
+            if (highlightUntil) form.append('highlightUntil', highlightUntil + 'T00:00:00.000Z');
 
             if (content) form.append('content', content);
 
@@ -116,7 +123,7 @@ export function EditNews() {
                 });
             }
 
-            await api.putForm(`otherSchedules/${id}`, form);
+            await api.putForm(`news/${id}`, form);
             toaster.success({ title: 'Comunicado atualizado com sucesso' });
             navigate('/comunicados');
             reset();
@@ -161,6 +168,7 @@ export function EditNews() {
                     mb={[36, 10]}
                 >
                     <Input type="text" label={'Título'} errorText={errors?.title?.message} {...register('title')} />
+                    <Textarea label="Resumo" errorText={errors?.summary?.message} {...register('summary')} />
                     <RichTextEditor
                         value={content || ''}
                         onChange={(value) => setValue('content', value)}
@@ -192,6 +200,23 @@ export function EditNews() {
                         onClear={handleClearFile}
                         label="Carregar novas imagens"
                     />
+                    <Controller
+                        control={control}
+                        name={'highlight'}
+                        render={({ field: { onChange, value } }) => (
+                            <Field label={'Destacar na tela inicial?'}>
+                                <Switch colorPalette={'brand'} mt={1} checked={value} onChange={onChange}></Switch>
+                            </Field>
+                        )}
+                    />
+                    {highlight && (
+                        <Input
+                            type="date"
+                            label="Data de fim de destaque"
+                            errorText={errors?.highlightUntil?.message}
+                            {...register('highlightUntil')}
+                        />
+                    )}
                     <HStack w="full" justify={'flex-end'}>
                         <Button variant={'outline'} w="fit-content" px={6} onClick={handleCancel}>
                             Cancelar

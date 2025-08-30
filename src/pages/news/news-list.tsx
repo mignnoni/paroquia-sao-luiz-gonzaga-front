@@ -11,13 +11,12 @@ import { HStack, Icon, useBreakpointValue, Button, Stack, For } from '@chakra-ui
 import { AxiosError } from 'axios';
 import { useCallback, useEffect, useState } from 'react';
 import { LuCirclePlus } from 'react-icons/lu';
-import { OtherScheduleTypes } from '@/constants/OtherScheduleTypes';
 import { useNavigate } from 'react-router-dom';
 import { PiMegaphoneFill } from 'react-icons/pi';
-import type { IOtherSchedule } from '@/interfaces/IOtherSchedule';
-import { OtherSchedulesTable } from '@/components/OtherSchedules/other-schedules-table';
-import { OtherSchedulesCard } from '@/components/OtherSchedules/other-schedules-card';
 import { EmptyList } from '@/components/EmptyList';
+import type { INews } from '@/interfaces/INews';
+import { NewsTable } from '@/components/MassLocations/News/news-table';
+import { NewsCard } from '@/components/MassLocations/News/news-card';
 
 export function NewsList() {
     const isWideVersion = useBreakpointValue({
@@ -28,7 +27,7 @@ export function NewsList() {
     const navigate = useNavigate();
 
     const [isLoaded, setIsLoaded] = useState(false);
-    const [newsList, setNewsList] = useState<IOtherSchedule[]>([]);
+    const [newsList, setNewsList] = useState<INews[]>([]);
     const [filters, setFilters] = useState<IPageFilter>({
         pageIndex: 0,
         pageSize: 10,
@@ -37,10 +36,9 @@ export function NewsList() {
     const fetchNews = useCallback(() => {
         setIsLoaded(false);
 
-        api.get<IOtherSchedule[]>('otherSchedules', {
+        api.get<INews[]>('news', {
             params: {
                 ...filters,
-                type: OtherScheduleTypes.News,
             },
         })
             .then((resp) => setNewsList(resp.data))
@@ -49,7 +47,7 @@ export function NewsList() {
     }, [filters]);
 
     const handleDelete = (id: string): void => {
-        api.delete(`/otherSchedules/${id}`)
+        api.delete(`/news/${id}`)
             .then(() => {
                 toaster.success({ title: 'Comunicado excluído com sucesso' });
                 filter();
@@ -107,9 +105,9 @@ export function NewsList() {
                 </Button>
             </HStack>
             {isWideVersion && (
-                <OtherSchedulesTable
+                <NewsTable
                     isLoaded={isLoaded}
-                    otherSchedulesList={newsList}
+                    newsList={newsList}
                     deleteMessage="o comunicado"
                     deleteAction={handleDelete}
                     editAction={editNews}
@@ -119,12 +117,7 @@ export function NewsList() {
                 <Stack mt={8} gap={4}>
                     <For each={newsList} fallback={<EmptyList />}>
                         {(news) => (
-                            <OtherSchedulesCard
-                                key={news.id}
-                                otherSchedule={news}
-                                deleteAction={handleDelete}
-                                editAction={editNews}
-                            />
+                            <NewsCard key={news.id} news={news} deleteAction={handleDelete} editAction={editNews} />
                         )}
                     </For>
                 </Stack>

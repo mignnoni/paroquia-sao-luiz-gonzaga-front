@@ -1,6 +1,4 @@
-import type { IBaseFileDTO } from './IBaseFileDTO';
-
-export interface INewsById {
+export interface INews {
     id: string;
     title: string;
     content: string;
@@ -9,5 +7,4 @@ export interface INewsById {
     highlightUntil: string | null;
     createdAt: string;
     updatedAt?: string;
-    files: IBaseFileDTO[];
 }
